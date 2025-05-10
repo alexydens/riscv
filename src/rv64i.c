@@ -26,7 +26,7 @@ static inline uint8_t ram_get_b(
   assert(addr < ram_size);
   return ((uint8_t *)ram)[addr];
 }
-/* Get a halfword from RAM */
+/* Get a half-word from RAM */
 static inline uint16_t ram_get_h(
     void *ram,
     uint64_t ram_size,
@@ -58,7 +58,7 @@ static inline uint32_t ram_get_w(
     | (ram_get_b(ram, ram_size, addr+2)<<16)
     | (ram_get_b(ram, ram_size, addr+3)<<24);
 }
-/* Get a double word from RAM */
+/* Get a double-word from RAM */
 static inline uint64_t ram_get_d(
     void *ram,
     uint64_t ram_size,
@@ -95,7 +95,7 @@ static inline void ram_set_b(
   assert(addr < ram_size);
   ((uint8_t *)ram)[addr] = val;
 }
-/* Set a halfword of RAM */
+/* Set a half-word of RAM */
 static inline void ram_set_h(
     void *ram,
     uint64_t ram_size,
@@ -131,7 +131,7 @@ static inline void ram_set_w(
     ram_set_b(ram, ram_size, addr+3, val >> 24);
   }
 }
-/* Set a double word of RAM */
+/* Set a double-word of RAM */
 static inline void ram_set_d(
     void *ram,
     uint64_t ram_size,
@@ -172,6 +172,12 @@ void rv64i_cpu_reset(rv64i_cpu_t *cpu, uint64_t reset_vector) {
 /* Step a rv64i CPU */
 void rv64i_cpu_step(rv64i_cpu_t *cpu, void *ram, uint64_t ram_size) {
   /* Fetch instruction */
+  /*
+   * The program counter must be half-word aligned, but doesn't have to be word
+   * aligned, to allow for compressed instructions, which only take up one
+   * half-word, to be mixed freely with regular instructions.
+   */
+  assert(cpu->pc % 2 == 0);
   uint32_t instr = ram_get_w(ram, ram_size, cpu->pc, LITTLE_ENDIAN);
 
   /* Decode instruction */
