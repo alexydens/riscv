@@ -162,6 +162,63 @@ static inline void ram_set_d(
 
 
 /* Reset a rv64i CPU */
-void rv64i_cpu_reset(rv64i_cpu_t *cpu, uint64_t reset_vector);
+void rv64i_cpu_reset(rv64i_cpu_t *cpu, uint64_t reset_vector) {
+  /* Set program counter to reset vector */
+  cpu->pc = reset_vector;
+  /* Zero out the x0 register (required) and the others (not required) */
+  for (uint8_t i = 0; i < 32; i++)
+    cpu->x[i] = 0;
+}
 /* Step a rv64i CPU */
-void rv64i_cpu_step(rv64i_cpu_t *cpu, void *ram, uint64_t ram_size);
+void rv64i_cpu_step(rv64i_cpu_t *cpu, void *ram, uint64_t ram_size) {
+  /* Fetch instruction */
+  uint32_t instr = ram_get_w(ram, ram_size, cpu->pc, LITTLE_ENDIAN);
+
+  /* Decode instruction */
+  /*
+   * Fields of instructions:
+   * - opcode: operation type.
+   * - rd: destination register.
+   * - rs1: source register 1.
+   * - rs2: source register 2.
+   * - funct3: 3-bit function code.
+   * - funct7: 7-bit function code.
+   * Instruction types:
+   * - R-type: two source registers, one destination register.
+   * - I-type: a source register, destination regsiter and 12-bit immediate.
+   * - S-type: two source registers and a 12-bit immediate.
+   * - B-type: for branching, two source registers and a 12-bit immediate.
+   * - U-type: a destination register and the upper 20 bits of an immediate.
+   * - J-type: a destination register and a 20 bit immediate.
+   * For exact instruction encoding, refer either to the code for the decode
+   * stage below or Volume I of the ISA Manual.
+   */
+  uint8_t opcode = instr & 0x7f;
+  uint8_t rd = (instr >> 7) & 0x1f;
+  uint8_t rs1 = (instr >> 15) & 0x1f;
+  uint8_t rs2 = (instr >> 20) & 0x1f;
+  uint8_t funct3 = (instr >> 12) & 0x7;
+  uint8_t funct7 = (instr >> 25) & 0x7f;
+  uint32_t i_imm = (0xfffff800 * (instr >> 31))                                 
+      | ((instr >> 20) & 0x7ff);                                                
+  uint32_t s_imm = (0xfffff800 * (instr >> 31))                                 
+      | ((instr >> 7) & 0x1f)                                                   
+      | ((instr >> 20) & 0x7e0);                                                
+  uint32_t b_imm = (0xfffff000 * (instr >> 31))                                 
+      | ((instr >> 7) & 0x1e)                                                   
+      | ((instr >> 20) & 0x7e0)                                                 
+      | ((instr << 4) & 0x800);                                                 
+  uint32_t u_imm = instr & 0xfffff000;                                          
+  uint32_t j_imm = (0xfff00000 * (instr >> 31))                                 
+      | ((instr >> 20) & 0x7fe)                                                 
+      | ((instr >> 9) & 0x800)                                                  
+      | (instr & 0x000ff000);
+
+  /* Execute instruction */
+  bool pc_changed = false;
+  switch (0) { default: break; }
+
+  /* Increment program counter */
+  if (!pc_changed)
+    cpu->pc += 4;
+}
