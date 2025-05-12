@@ -21,7 +21,7 @@ $(OBJ_DIR):
 $(BIN_DIR):
 	mkdir -p $@
 
-.PHONY: clean build test-neat test
+.PHONY: clean build test
 
 build: $(BIN_DIR)/$(PROJECT_NAME)
 
