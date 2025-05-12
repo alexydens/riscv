@@ -160,6 +160,10 @@ static inline void ram_set_d(
   }
 }
 
+/* What to do with an invalid instruction */
+static inline void invalid_instr(void) {
+  assert(0);
+}
 
 /* Reset a rv64i CPU */
 void rv64i_cpu_reset(rv64i_cpu_t *cpu, uint64_t reset_vector) {
@@ -222,7 +226,11 @@ void rv64i_cpu_step(rv64i_cpu_t *cpu, void *ram, uint64_t ram_size) {
 
   /* Execute instruction */
   bool pc_changed = false;
-  switch (0) { default: break; }
+  switch (0) {
+    default: /* Opcode not recognized */
+      invalid_instr();
+      break;
+  }
 
   /* Increment program counter */
   if (!pc_changed)
