@@ -12,6 +12,31 @@ uint32_t rv32i_getreg(rv32i_t *cpu, uint8_t reg) {
   return cpu->regs[reg];
 }
 
+/* Get 8-bit value at address in ram */
+static inline uint8_t ram_get_8(
+    void *ram, uint32_t ram_size, uint32_t addr
+);
+/* Get 16-bit value at address in ram */
+static inline uint16_t ram_get_16(
+    void *ram, uint32_t ram_size, uint32_t addr
+);
+/* Get 32-bit value at address in ram */
+static inline uint32_t ram_get_32(
+    void *ram, uint32_t ram_size, uint32_t addr
+);
+/* Set 8-bit value at address in ram */
+static inline void ram_set_8(
+    void *ram, uint32_t ram_size, uint32_t addr, uint8_t val
+);
+/* Set 16-bit value at address in ram */
+static inline void ram_set_16(
+    void *ram, uint32_t ram_size, uint32_t addr, uint16_t val
+);
+/* Set 32-bit value at address in ram */
+static inline void ram_set_32(
+    void *ram, uint32_t ram_size, uint32_t addr, uint32_t val
+);
+
 /* Reset a rv32i cpu */
 void rv32i_reset(rv32i_t *cpu, uint32_t pc) {
   cpu->pc = pc;
